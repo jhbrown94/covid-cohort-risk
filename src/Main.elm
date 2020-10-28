@@ -141,7 +141,7 @@ As part of COVID management, some schools are dividing students into cohorts for
 This is a simple tool to help schools evaluate how often an individual cohort is likely to have a COVID-positive person or people in it, and how often one or more cohorts, out of many in a district, are likely to have COVID-positive people in them.
 This tool examines both the likelihood that a cohort has someone infected on day one -- which is to say, the first day that students walk into the classroom -- and the likelihood of later infections impacting cohorts.
 This tool makes the simplifying assumption that everyone in a community has the same risk of being infected, based on the community new-case-rate, regardless of age and other distinguishing characteristics.
-For questions or comments, contact Professor Daniele Lantagne at daniele.lantagne@tufts.edu and Jeremy Brown at jhbrown@gmail.com
+For questions or comments, contact Professor Daniele Lantagne at daniele.lantagne@tufts.edu and Dr. Jeremy Brown at jhbrown@gmail.com
 Veradept, Inc. is hosting this tool as a courtesy. This tool is not an official product of Veradept, Inc. and Veradept makes no representations as to the correctness of this tool, or its suitability for any purpose whatsoever.
 """
 
