@@ -96,9 +96,7 @@ textOrSliderValue state =
 
 
 type Msg
-    = OnUrlChange Url
-    | OnUrlRequest UrlRequest
-    | DailyNewCasesPer100K TextOrSliderMsg
+    = DailyNewCasesPer100K TextOrSliderMsg
     | DaysOfInfection TextOrSliderMsg
     | PodSizeIncludingTeacher TextOrSliderMsg
     | NumberOfStudents TextOrSliderMsg
@@ -120,8 +118,8 @@ newTextOrSliderState decimals value =
     TextOrSliderState value "banana" |> textOrSliderUpdate (SliderUpdate value) decimals
 
 
-init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
-init flags url key =
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     ( Model (newTextOrSliderState 2 5.0)
         (newTextOrSliderState 0 14.0)
         (newTextOrSliderState 0 13.0)
@@ -257,12 +255,6 @@ view model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        OnUrlChange _ ->
-            ( model, Cmd.none )
-
-        OnUrlRequest _ ->
-            ( model, Cmd.none )
-
         DailyNewCasesPer100K m ->
             ( { model | daily_new_cases_per_100k = textOrSliderUpdate m 2 model.daily_new_cases_per_100k }, Cmd.none )
 
@@ -281,11 +273,9 @@ subscriptions model =
 
 
 main =
-    Browser.application
+    Browser.document
         { init = init
         , update = update
         , view = view
         , subscriptions = subscriptions
-        , onUrlChange = OnUrlChange
-        , onUrlRequest = OnUrlRequest
         }
