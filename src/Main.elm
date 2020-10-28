@@ -137,12 +137,21 @@ init flags =
 
 blurb =
     """
-As part of COVID management, some schools are dividing students into cohorts for in-person learning. Students and teachers in a cohort meet only with one another. This strategy is intended to limit the number of people exposed to COVID -- if someone in a cohort acquires COVID in the community, only the people in that cohort need to quarantine and test.
+As part of COVID-19 response, some schools are dividing students into "cohorts" for in-person learning. Students and teachers in a cohort meet only with one another. This strategy is intended to limit the number of people exposed to a person who is positive COVID-19 in a school -- if someone in a cohort acquires COVID-19 in the community, only the people in that cohort need to subsequently quarantine and test.
+
+In a "cohort" strategy, the probability of having one person of a cohort positive for COVID-19 is dependent on: community transmission rates, size of cohort.  The probability of having a cohort in a district test positive depends on these factors, as well as the number of cohorts. 
+
 This is a simple tool to help schools evaluate how often an individual cohort is likely to have a COVID-positive person or people in it, and how often one or more cohorts, out of many in a district, are likely to have COVID-positive people in them.
+
 This tool examines both the likelihood that a cohort has someone infected on day one -- which is to say, the first day that students walk into the classroom -- and the likelihood of later infections impacting cohorts.
+
 This tool makes the simplifying assumption that everyone in a community has the same risk of being infected, based on the community new-case-rate, regardless of age and other distinguishing characteristics.
-For questions or comments, contact Professor Daniele Lantagne at daniele.lantagne@tufts.edu and Dr. Jeremy Brown at jhbrown@gmail.com
-Veradept, Inc. is hosting this tool as a courtesy. This tool is not an official product of Veradept, Inc. and Veradept makes no representations as to the correctness of this tool, or its suitability for any purpose whatsoever.
+
+This model *only* describes the probability that a person arrives at the school COIVD-19 positive due to community transmission.  This model does NOT say anything about transmission within a cohort or within a school.   Transmission within a cohort or school will be dependent on a variety of factors, including but not limited to: cohort strategy, masking, social distancing, disinfection, and ventilation strategy.  None of these are modeled here.  
+
+For questions or comments, contact Professor Daniele Lantagne at danielelantagne@earthlink.net and Dr. Jeremy Brown at jhbrown@gmail.com
+
+Veradept, Inc. is hosting this tool as a courtesy. This tool is not an official product of Veradept, Inc. or Tufts University and Veradept and Tufts University make no representations as to the correctness of this tool, or its suitability for any purpose whatsoever.
 """
 
 
