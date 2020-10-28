@@ -232,7 +232,7 @@ display model =
             , column [ width fill, Border.width 1, Border.color grey, padding 16, spacing 16 ]
                 [ text "COVID-19 parameters"
                 , textSlider { onChange = DailyNewCasesPer100K, description = "Daily new cases per 100,000 people", min = 0.1, max = 25.0, step = Nothing } model.daily_new_cases_per_100k
-                , textSlider { onChange = DaysOfInfection, description = "Days of infection", min = 1, max = 25, step = Just 1.0 } model.days_of_infection
+                , textSlider { onChange = DaysOfInfection, description = "Days someone is infectious (14 is current best estimate)", min = 1, max = 25, step = Just 1.0 } model.days_of_infection
                 ]
             , column [ width fill, Border.width 1, Border.color grey, padding 16, spacing 16 ]
                 [ text "District parameters:"
@@ -255,7 +255,7 @@ display model =
                             { onChange = NumberOfStudents
                             , text = model.number_of_students_field
                             , placeholder = Nothing
-                            , label = Input.labelLeft [] <| text "Number of students"
+                            , label = Input.labelLeft [] <| text "Total number of students"
                             }
                     ]
                 , textSlider { onChange = CohortSizeIncludingTeacher, description = "Cohort size (including teacher)", min = 5, max = 31, step = Just 1.0 } model.cohort_size_including_teacher

@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.js"],"names":["app","Elm","Main","init"],"mappings":";;;AAEA,aAFA,IAAA,EAAA,QAAA,kBAEIA,EAAMC,EAAIC,IAAAA,KAAKC","file":"podsim.c93400d0.js","sourceRoot":"..","sourcesContent":["import { Elm } from \"./src/Main.elm\";\n\nvar app = Elm.Main.init();\n"]}
