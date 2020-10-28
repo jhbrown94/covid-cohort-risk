@@ -2,9 +2,10 @@ module Main exposing (..)
 
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Navigation
-import Element
+import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input
 import FormatNumber exposing (format)
 import FormatNumber.Locales exposing (Decimals(..), spanishLocale, usLocale)
@@ -12,32 +13,36 @@ import Html exposing (Html)
 import Url exposing (Url)
 
 
-float value =
-    Element.text (format usLocale value)
-
-
 grey =
-    Element.rgb 0.5 0.5 0.5
+    rgb 0.5 0.5 0.5
+
+
+lightGrey =
+    rgb 0.95 0.95 0.95
+
+
+darkGrey =
+    rgb 0.2 0.2 0.2
 
 
 red =
-    Element.rgb 1.0 0.0 0.0
+    rgb 1.0 0.0 0.0
 
 
 slider attrs message description minVal maxVal step value =
     Input.slider
-        ([ Element.height (Element.px 30)
+        ([ height (px 30)
 
          -- Here is where we're creating/styling the "track"
-         , Element.behindContent
-            (Element.el
-                [ Element.width Element.fill
-                , Element.height (Element.px 2)
-                , Element.centerY
+         , behindContent
+            (el
+                [ width fill
+                , height (px 2)
+                , centerY
                 , Background.color grey
                 , Border.rounded 2
                 ]
-                Element.none
+                none
             )
          ]
             ++ attrs
@@ -53,7 +58,7 @@ slider attrs message description minVal maxVal step value =
         }
 
 
-text attrs message description value =
+textInput attrs message description value =
     Input.text attrs
         { onChange = message
         , text = value
@@ -98,8 +103,8 @@ textOrSliderValue state =
 type Msg
     = DailyNewCasesPer100K TextOrSliderMsg
     | DaysOfInfection TextOrSliderMsg
-    | PodSizeIncludingTeacher TextOrSliderMsg
-    | NumberOfStudents TextOrSliderMsg
+    | CohortSizeIncludingTeacher TextOrSliderMsg
+    | NumberOfStudents String
 
 
 type alias Flags =
@@ -109,8 +114,9 @@ type alias Flags =
 type alias Model =
     { daily_new_cases_per_100k : TextOrSliderState
     , days_of_infection : TextOrSliderState
-    , pod_size_including_teacher : TextOrSliderState
-    , number_of_students : TextOrSliderState
+    , cohort_size_including_teacher : TextOrSliderState
+    , number_of_students : Int
+    , number_of_students_field : String
     }
 
 
@@ -123,9 +129,21 @@ init flags =
     ( Model (newTextOrSliderState 2 5.0)
         (newTextOrSliderState 0 14.0)
         (newTextOrSliderState 0 13.0)
-        (newTextOrSliderState 0 2000.0)
+        2000
+        "2000"
     , Cmd.none
     )
+
+
+blurb =
+    """
+As part of COVID management, some schools are dividing students into cohorts for in-person learning. Students and teachers in a cohort meet only with one another. This strategy is intended to limit the number of people exposed to COVID -- if someone in a cohort acquires COVID in the community, only the people in that cohort need to quarantine and test.
+This is a simple tool to help schools evaluate how often an individual cohort is likely to have a COVID-positive person or people in it, and how often one or more cohorts, out of many in a district, are likely to have COVID-positive people in them.
+This tool examines both the likelihood that a cohort has someone infected on day one -- which is to say, the first day that students walk into the classroom -- and the likelihood of later infections impacting cohorts.
+This tool makes the simplifying assumption that everyone in a community has the same risk of being infected, based on the community new-case-rate, regardless of age and other distinguishing characteristics.
+For questions or comments, contact Professor Daniele Lantagne at daniele.lantagne@tufts.edu and Jeremy Brown at jhbrown@gmail.com
+Veradept, Inc. is hosting this tool as a courtesy. This tool is not an official product of Veradept, Inc. and Veradept makes no representations as to the correctness of this tool, or its suitability for any purpose whatsoever.
+"""
 
 
 display : Model -> Html Msg
@@ -138,14 +156,14 @@ display model =
             model.days_of_infection.value
 
         number_of_students =
-            model.number_of_students.value
+            toFloat model.number_of_students
 
-        pod_size_including_teacher =
-            model.pod_size_including_teacher.value
+        cohort_size_including_teacher =
+            model.cohort_size_including_teacher.value
 
-        number_of_pods =
+        number_of_cohorts =
             number_of_students
-                / (pod_size_including_teacher - 1)
+                / (cohort_size_including_teacher - 1)
 
         p_a_random_person_is_newly_infected_today =
             daily_new_cases_per_100k / 100000.0
@@ -159,67 +177,114 @@ display model =
         p_a_random_person_is_not_infected_today =
             1.0 - p_a_random_person_is_currently_infected
 
-        p_a_random_pod_has_no_infections =
+        p_a_random_cohort_has_no_infections =
             p_a_random_person_is_not_infected_today
-                ^ pod_size_including_teacher
+                ^ cohort_size_including_teacher
 
-        p_a_random_pod_has_at_least_one_infection =
-            1.0 - p_a_random_pod_has_no_infections
+        p_a_random_cohort_has_at_least_one_infection =
+            1.0 - p_a_random_cohort_has_no_infections
 
-        p_no_pod_has_infections =
-            p_a_random_pod_has_no_infections ^ number_of_pods
+        p_no_cohort_has_infections =
+            p_a_random_cohort_has_no_infections ^ number_of_cohorts
 
-        p_some_pods_have_infections =
-            1.0 - p_no_pod_has_infections
+        p_some_cohorts_have_infections =
+            1.0 - p_no_cohort_has_infections
 
-        p_a_random_pod_gets_no_new_infections_today =
+        p_a_random_cohort_gets_no_new_infections_today =
             p_a_random_person_is_not_newly_infected_today
-                ^ pod_size_including_teacher
+                ^ cohort_size_including_teacher
 
-        p_a_random_pod_gets_some_new_infections_today =
-            1.0 - p_a_random_pod_gets_no_new_infections_today
+        p_a_random_cohort_gets_some_new_infections_today =
+            1.0 - p_a_random_cohort_gets_no_new_infections_today
 
-        expected_number_of_days_between_infections_in_a_pod =
-            1.0 / p_a_random_pod_gets_some_new_infections_today
+        expected_number_of_days_between_infections_in_a_cohort =
+            1.0 / p_a_random_cohort_gets_some_new_infections_today
 
-        p_no_pods_get_new_infections_today =
-            p_a_random_pod_gets_no_new_infections_today ^ number_of_pods
+        p_no_cohorts_get_new_infections_today =
+            p_a_random_cohort_gets_no_new_infections_today ^ number_of_cohorts
 
-        p_some_pods_get_new_infections_today =
-            1.0 - p_no_pods_get_new_infections_today
+        p_some_cohorts_get_new_infections_today =
+            1.0 - p_no_cohorts_get_new_infections_today
 
-        expected_number_of_days_between_new_pod_infection_events =
-            1.0 / p_some_pods_get_new_infections_today
+        expected_number_of_days_between_new_cohort_infection_events =
+            1.0 / p_some_cohorts_get_new_infections_today
     in
-    Element.layout [] <|
-        Element.column [ Element.padding 8, Element.spacing 8 ]
-            [ textSlider { onChange = DailyNewCasesPer100K, description = "Daily new cases per 100,000 people", min = 0.1, max = 25.0, step = Nothing } model.daily_new_cases_per_100k
-            , textSlider { onChange = DaysOfInfection, description = "Days of infection", min = 1, max = 25, step = Just 1.0 } model.days_of_infection
-            , textSlider { onChange = NumberOfStudents, description = "Number of students", min = 10.0, max = 10000.0, step = Just 10 } model.number_of_students
-            , textSlider { onChange = PodSizeIncludingTeacher, description = "Pod size (including teacher)", min = 5, max = 31, step = Just 1.0 } model.pod_size_including_teacher
-            , percent "Chance that a randomly selected pod has one or more infected people on day one" p_a_random_pod_has_at_least_one_infection
-            , percent "Chance that one or more of the pods has one or more infected people on day one" p_some_pods_have_infections
-            , expected "Expected number of calendar days between infections in one pod" expected_number_of_days_between_infections_in_a_pod
-            , percent "Chance that one or more of the pods get one or more new infections on any given calendar day" p_some_pods_get_new_infections_today
-            , expected "Expected number of calendar days between new infections in one or more pods" expected_number_of_days_between_new_pod_infection_events
+    layout [ width fill, Background.color darkGrey ] <|
+        column
+            [ centerX
+            , width (fill |> maximum 800)
+            , Border.rounded 4
+            , Background.color lightGrey
+            , padding 16
+            , spacing 16
+            ]
+            [ textColumn [ width fill, Border.width 1, Border.color grey, padding 16, spacing 16 ] <|
+                List.map (text >> List.singleton >> paragraph [ width fill ]) (String.split "\n" blurb)
+            , column [ centerX, spacing 8, width (fill |> maximum 640) ]
+                [ el
+                    [ width fill
+                    , Border.width 1
+                    , Border.color grey
+                    , padding 8
+                    ]
+                  <|
+                    Input.text
+                        [ width (px 120)
+                        , if String.toInt model.number_of_students_field == Nothing then
+                            Border.color red
+
+                          else
+                            Border.color grey
+                        ]
+                        { onChange = NumberOfStudents
+                        , text = model.number_of_students_field
+                        , placeholder = Nothing
+                        , label = Input.labelLeft [] <| text "Number of students"
+                        }
+                , textSlider { onChange = DailyNewCasesPer100K, description = "Daily new cases per 100,000 people", min = 0.1, max = 25.0, step = Nothing } model.daily_new_cases_per_100k
+                , textSlider { onChange = DaysOfInfection, description = "Days of infection", min = 1, max = 25, step = Just 1.0 } model.days_of_infection
+                , textSlider { onChange = CohortSizeIncludingTeacher, description = "Cohort size (including teacher)", min = 5, max = 31, step = Just 1.0 } model.cohort_size_including_teacher
+                ]
+            , column [ width fill, spacing 8 ]
+                [ wrappedRow [ width fill ]
+                    [ el [ width (fillPortion 1 |> minimum 150) ] none
+                    , el [ width (fillPortion 2) ] <| roundup "Number of cohorts" number_of_cohorts
+                    , el [ width (fillPortion 1 |> minimum 150) ] none
+                    ]
+                , wrappedRow [ width fill, spacing 8 ]
+                    [ percent "Chance that a randomly selected cohort has one or more infected people on day one" p_a_random_cohort_has_at_least_one_infection
+                    , percent "Chance that one or more of the cohorts has one or more infected people on day one" p_some_cohorts_have_infections
+                    ]
+                , wrappedRow [ width fill ]
+                    [ el [ width (fillPortion 1 |> minimum 150) ] none
+                    , el [ width (fillPortion 2) ] <| percent "Chance that one or more of the cohorts get one or more new infections on any given calendar day" p_some_cohorts_get_new_infections_today
+                    , el [ width (fillPortion 1 |> minimum 150) ] none
+                    ]
+                , wrappedRow [ width fill, spacing 8 ]
+                    [ expected "Expected number of calendar days between infections in one cohort" expected_number_of_days_between_infections_in_a_cohort
+                    , expected "Expected number of calendar days between new infections in one or more cohorts" expected_number_of_days_between_new_cohort_infection_events
+                    ]
+                ]
             ]
 
 
 textSlider { onChange, description, min, max, step } state =
-    Element.column
-        [ Element.padding 8
-        , Element.spacing 4
+    column
+        [ padding 8
+        , spacing 4
         , Border.width 1
         , Border.color grey
+        , width fill
         ]
-        [ Element.paragraph [] [ Element.text description ]
-        , Element.row
-            [ Element.padding 8
-            , Element.spacing 4
+        [ paragraph [] [ text description ]
+        , row
+            [ padding 8
+            , spacing 4
+            , width fill
             ]
-            [ slider [ Element.width (Element.px 250) ] (SliderUpdate >> onChange) description min max step state.value
-            , Element.el [ Element.width (Element.px 100) ] <|
-                text
+            [ slider [ width fill ] (SliderUpdate >> onChange) description min max step state.value
+            , el [ width (px 100) ] <|
+                textInput
                     (if textOrSliderValidText state then
                         []
 
@@ -233,21 +298,37 @@ textSlider { onChange, description, min, max, step } state =
         ]
 
 
+float value =
+    text (format usLocale value)
+
+
 percent description value =
-    Element.row []
-        [ Element.paragraph [] [ Element.text description, Element.text ":  ", float (value * 100.0), Element.text "%" ]
-        ]
+    el [ Border.width 1, padding 8, width fill, height fill ] <|
+        row [ width (fill |> minimum 300), spacing 16, centerY ]
+            [ paragraph [ Font.alignRight ] [ text description, text ":" ]
+            , paragraph [ Font.alignRight, Font.bold, width (px 80) ] [ text (format usLocale (value * 100.0)), text "%" ]
+            ]
 
 
 expected description value =
-    Element.row []
-        [ Element.paragraph [] [ Element.text description, Element.text ":  ", float value ]
-        ]
+    el [ Border.width 1, padding 8, width fill, height fill ] <|
+        row [ width (fill |> minimum 300), spacing 16 ]
+            [ paragraph [ Font.alignRight ] [ text description, text ":" ]
+            , paragraph [ Font.alignRight, Font.bold, width (px 80) ] [ text (format { usLocale | decimals = Exact 1 } value) ]
+            ]
+
+
+roundup description value =
+    el [ Border.width 1, padding 8, width fill, height fill ] <|
+        row [ width (fill |> minimum 300), spacing 16 ]
+            [ paragraph [ Font.alignRight ] [ text description, text ":" ]
+            , paragraph [ Font.alignRight, Font.bold, width (px 80) ] [ text (ceiling value |> String.fromInt) ]
+            ]
 
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Pod Stats"
+    { title = "Cohort Stats"
     , body = [ display model ]
     }
 
@@ -261,11 +342,16 @@ update msg model =
         DaysOfInfection m ->
             ( { model | days_of_infection = textOrSliderUpdate m 0 model.days_of_infection }, Cmd.none )
 
-        PodSizeIncludingTeacher m ->
-            ( { model | pod_size_including_teacher = textOrSliderUpdate m 0 model.pod_size_including_teacher }, Cmd.none )
+        CohortSizeIncludingTeacher m ->
+            ( { model | cohort_size_including_teacher = textOrSliderUpdate m 0 model.cohort_size_including_teacher }, Cmd.none )
 
-        NumberOfStudents m ->
-            ( { model | number_of_students = textOrSliderUpdate m 0 model.number_of_students }, Cmd.none )
+        NumberOfStudents string ->
+            ( { model
+                | number_of_students = String.toInt string |> Maybe.withDefault model.number_of_students
+                , number_of_students_field = string
+              }
+            , Cmd.none
+            )
 
 
 subscriptions model =
