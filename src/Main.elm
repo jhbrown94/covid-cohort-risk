@@ -220,38 +220,40 @@ display model =
             ]
             [ textColumn [ width fill, Border.width 1, Border.color grey, padding 16, spacing 16 ] <|
                 List.map (text >> List.singleton >> paragraph [ width fill ]) (String.split "\n" blurb)
-            , column [ centerX, spacing 8, width (fill |> maximum 640) ]
-                [ el
-                    [ width fill
-                    , Border.width 1
-                    , Border.color grey
-                    , padding 8
-                    ]
-                  <|
-                    Input.text
-                        [ width (px 120)
-                        , if String.toInt model.number_of_students_field == Nothing then
-                            Border.color red
-
-                          else
-                            Border.color grey
-                        ]
-                        { onChange = NumberOfStudents
-                        , text = model.number_of_students_field
-                        , placeholder = Nothing
-                        , label = Input.labelLeft [] <| text "Number of students"
-                        }
+            , column [ width fill, Border.width 1, Border.color grey, padding 16, spacing 16 ]
+                [ text "COVID-19 parameters"
                 , textSlider { onChange = DailyNewCasesPer100K, description = "Daily new cases per 100,000 people", min = 0.1, max = 25.0, step = Nothing } model.daily_new_cases_per_100k
                 , textSlider { onChange = DaysOfInfection, description = "Days of infection", min = 1, max = 25, step = Just 1.0 } model.days_of_infection
+                ]
+            , column [ width fill, Border.width 1, Border.color grey, padding 16, spacing 16 ]
+                [ text "District parameters:"
+                , column [ centerX, spacing 8, width fill ]
+                    [ el
+                        [ width fill
+                        , Border.width 1
+                        , Border.color grey
+                        , padding 8
+                        ]
+                      <|
+                        Input.text
+                            [ width (px 120)
+                            , if String.toInt model.number_of_students_field == Nothing then
+                                Border.color red
+
+                              else
+                                Border.color grey
+                            ]
+                            { onChange = NumberOfStudents
+                            , text = model.number_of_students_field
+                            , placeholder = Nothing
+                            , label = Input.labelLeft [] <| text "Number of students"
+                            }
+                    ]
                 , textSlider { onChange = CohortSizeIncludingTeacher, description = "Cohort size (including teacher)", min = 5, max = 31, step = Just 1.0 } model.cohort_size_including_teacher
+                , roundup "Number of cohorts" number_of_cohorts
                 ]
             , column [ width fill, spacing 8 ]
-                [ wrappedRow [ width fill ]
-                    [ el [ width (fillPortion 1 |> minimum 150) ] none
-                    , el [ width (fillPortion 2) ] <| roundup "Number of cohorts" number_of_cohorts
-                    , el [ width (fillPortion 1 |> minimum 150) ] none
-                    ]
-                , wrappedRow [ width fill, spacing 8 ]
+                [ wrappedRow [ width fill, spacing 8 ]
                     [ percent "Chance that a randomly selected cohort has one or more infected people on day one" p_a_random_cohort_has_at_least_one_infection
                     , percent "Chance that one or more of the cohorts has one or more infected people on day one" p_some_cohorts_have_infections
                     ]
@@ -319,7 +321,7 @@ expected description value =
 
 
 roundup description value =
-    el [ Border.width 1, padding 8, width fill, height fill ] <|
+    el [ Border.width 1, padding 8, centerX ] <|
         row [ width (fill |> minimum 300), spacing 16 ]
             [ paragraph [ Font.alignRight ] [ text description, text ":" ]
             , paragraph [ Font.alignRight, Font.bold, width (px 80) ] [ text (ceiling value |> String.fromInt) ]
