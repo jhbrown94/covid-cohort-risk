@@ -127,7 +127,7 @@ newTextOrSliderState decimals value =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( Model (newTextOrSliderState 2 5.0)
-        (newTextOrSliderState 0 14.0)
+        (newTextOrSliderState 0 10.0)
         (newTextOrSliderState 0 13.0)
         2000
         "2000"
@@ -232,7 +232,7 @@ display model =
             , column [ width fill, Border.width 1, Border.color grey, padding 16, spacing 16 ]
                 [ text "COVID-19 parameters"
                 , textSlider { onChange = DailyNewCasesPer100K, description = "Daily new cases per 100,000 people", min = 0.1, max = 25.0, step = Nothing } model.daily_new_cases_per_100k
-                , textSlider { onChange = DaysOfInfection, description = "Days someone is infectious (14 is current best estimate)", min = 1, max = 25, step = Just 1.0 } model.days_of_infection
+                , textSlider { onChange = DaysOfInfection, description = "Days someone is infectious (10 is current best estimate)", min = 1, max = 25, step = Just 1.0 } model.days_of_infection
                 ]
             , column [ width fill, Border.width 1, Border.color grey, padding 16, spacing 16 ]
                 [ text "District parameters:"
