@@ -195,8 +195,11 @@ display model =
         p_a_random_person_is_not_newly_infected_today =
             1.0 - p_a_random_person_is_newly_infected_today
 
+        p_a_random_person_was_not_infected_in_the_last_n_days =
+            p_a_random_person_is_not_newly_infected_today ^ days_of_infection
+
         p_a_random_person_is_currently_infected =
-            p_a_random_person_is_newly_infected_today * days_of_infection
+            1.0 - p_a_random_person_was_not_infected_in_the_last_n_days
 
         p_a_random_person_is_not_infected_today =
             1.0 - p_a_random_person_is_currently_infected
